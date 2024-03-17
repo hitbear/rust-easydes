@@ -3,6 +3,13 @@ name = "easydes"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "easydes"
+path = "src/lib.rs"
+
+[[bin]]
+name = "easydes"
+path = "src/bin.rs"
 
 [dependencies]
+clap = "4.5.3"

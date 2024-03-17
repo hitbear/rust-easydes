@@ -2,6 +2,8 @@ mod constants;
 
 pub mod easydes {
 
+    pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+
     pub enum Des {
         Encrypt, //0
         Decrypt, //1
