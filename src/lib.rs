@@ -9,6 +9,7 @@ pub mod easydes {
         Decrypt, //1
     }
 
+    #[derive(PartialEq)]
     pub enum Mode {
         ECB,
         CBC,
