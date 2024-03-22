@@ -43,9 +43,10 @@ To decrypt this file, you can run
 
 To encrypt a file with Triple DES, run
 
-   easydes -3 --key 133457799BBCDFF111111111111111112222222222222222 --iv 1111111111111111 -m CBC -e --infile tests/infile.txt  --outfile output.enc
+    easydes -3 --key 133457799BBCDFF111111111111111112222222222222222 --iv 1111111111111111 -m CBC -e --infile tests/infile.txt  --outfile output.enc
 
 To decrypt this file, you can run
+
     easydes -3 --key 133457799BBCDFF111111111111111112222222222222222 --iv 1111111111111111 -m CBC -d --infile output.enc --outfile clear.txt; cat clear.txt
 
 
