@@ -11,6 +11,12 @@ fn main() {
         .about("Encrypt and decrypt with DES.")
         .arg(Arg::new("v").short('v').help("Enable verbose logging"))
         .arg(
+            Arg::new("triple_des")
+                .short('3')
+                .long("triple_des")
+                .help("Encrypt/Decrypt using Triple DES.")
+        )
+        .arg(
             Arg::new("key")
                 .short('k')
                 .long("key")
@@ -84,10 +90,6 @@ fn main() {
         panic!("We need an IV in CBC mode!");
     }
 
-    let key_hex_string: &str = arg_matches.value_of("key").unwrap();
-    let mut key: [u8; 8] = [0 as u8; 8];
-    hex::decode_to_slice(key_hex_string, &mut key).expect("Decoding key failed");
-
     let mut input: Vec<u8> = Vec::new();
 
     if let Some(infile) = arg_matches.value_of("if") {
@@ -96,12 +98,50 @@ fn main() {
     }
 
     let output = match des_mode {
-        Mode::ECB => des_ecb(&key, &mut input.to_vec(), enc_or_dec),
+        Mode::ECB => {
+            match arg_matches.is_present("triple_des"){
+                true => {
+
+                    let key_hex_string: &str = arg_matches.value_of("key").unwrap();
+                    let mut key: [u8; 24] = [0 as u8; 24];
+                    hex::decode_to_slice(key_hex_string, &mut key).expect("Decoding key failed");
+
+                    triple_des_ecb(&key, &mut input.to_vec(), enc_or_dec)
+                }
+                false => {
+                    let key_hex_string: &str = arg_matches.value_of("key").unwrap();
+                    let mut key: [u8; 8] = [0 as u8; 8];
+                    hex::decode_to_slice(key_hex_string, &mut key).expect("Decoding key failed");
+                    
+                    des_ecb(&key, &mut input.to_vec(), enc_or_dec)
+                }
+            }
+        }
         Mode::CBC => {
-            let mut iv: [u8; 8] = [0 as u8; 8];
-            let iv_hex_string = arg_matches.value_of("key").unwrap();
-            hex::decode_to_slice(iv_hex_string, &mut iv).expect("Decoding IV failed");
-            des_cbc(&key, &iv, &mut input.to_vec(), enc_or_dec)
+            match arg_matches.is_present("triple_des"){
+                true => {
+                    let key_hex_string: &str = arg_matches.value_of("key").unwrap();
+                    let mut key: [u8; 24] = [0 as u8; 24];
+                    hex::decode_to_slice(key_hex_string, &mut key).expect("Decoding key failed");
+
+                    let mut iv: [u8; 8] = [0 as u8; 8];
+                    let iv_hex_string = arg_matches.value_of("iv").unwrap();
+                    hex::decode_to_slice(iv_hex_string, &mut iv).expect("Decoding IV failed");
+
+                    triple_des_cbc(&key, &iv, &mut input.to_vec(), enc_or_dec)
+                }
+                false => {
+                    let key_hex_string: &str = arg_matches.value_of("key").unwrap();
+                    let mut key: [u8; 8] = [0 as u8; 8];
+                    hex::decode_to_slice(key_hex_string, &mut key).expect("Decoding key failed");
+        
+                    let mut iv: [u8; 8] = [0 as u8; 8];
+                    let iv_hex_string = arg_matches.value_of("iv").unwrap();
+                    hex::decode_to_slice(iv_hex_string, &mut iv).expect("Decoding IV failed");
+        
+                    des_cbc(&key, &iv, &mut input.to_vec(), enc_or_dec)
+                }
+            }
         }
     };
 

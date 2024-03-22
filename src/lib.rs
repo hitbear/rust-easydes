@@ -427,13 +427,13 @@ pub mod easydes {
         let num_frames: usize = input.len() / 8;
 
         let mut key_table1: [[u8; 6]; 16] = [[0; 6]; 16];
-        calculate_key_table(key, &mut key_table1);
+        calculate_key_table(key1.as_slice(), &mut key_table1);
 
         let mut key_table2: [[u8; 6]; 16] = [[0; 6]; 16];
-        calculate_key_table(key, &mut key_table2);
+        calculate_key_table(key2.as_slice(), &mut key_table2);
 
         let mut key_table3: [[u8; 6]; 16] = [[0; 6]; 16];
-        calculate_key_table(key, &mut key_table3);
+        calculate_key_table(key3.as_slice(), &mut key_table3);
 
         let mut output: Vec<u8> = Vec::new();
         match direction {
@@ -464,9 +464,9 @@ pub mod easydes {
             Des::Decrypt => {
                 for frame_ctr in 0..num_frames {
                     let frame: &mut [u8] = &mut input[(frame_ctr * 8)..((frame_ctr + 1) * 8)];
-                    let block1: [u8; 8] = encrypt_frame(&frame, &Des::Decrypt, &key_table1);
+                    let block1: [u8; 8] = encrypt_frame(&frame, &Des::Decrypt, &key_table3);
                     let block2: [u8; 8] = encrypt_frame(&block1, &Des::Encrypt, &key_table2);
-                    let mut block3: [u8; 8] = encrypt_frame(&block2, &Des::Decrypt, &key_table3);
+                    let mut block3: [u8; 8] = encrypt_frame(&block2, &Des::Decrypt, &key_table1);
 
                     match frame_ctr {
                         0 => {
@@ -582,7 +582,7 @@ mod tests {
     }
 
     #[test]
-    fn triple_des_ecb_strings() {
+    fn triple_des_ecb() {
         let plaintext: &str = "HelloWorldHelloWorld";
         let key: [u8; 24] = [
             0x13, 0x34, 0x57, 0x79, 0x9B, 0xBC, 0xDF, 0xF1, 0x13, 0x34, 0x57, 0x79, 0x9B, 0xBC,
@@ -599,6 +599,39 @@ mod tests {
 
         let mut plaintext_again: Vec<u8> =
             easydes::triple_des_ecb(&key, &mut ciphertext, easydes::Des::Decrypt);
+
+        while plaintext_again.last() == Some(&0x00) {
+            plaintext_again.pop();
+        }
+
+        println!("{:?}", String::from_utf8(plaintext_again.clone()).unwrap());
+
+        assert_eq!(
+            String::from_utf8(plaintext.as_bytes().to_vec()).unwrap(),
+            String::from_utf8(plaintext_again).unwrap()
+        );
+    }
+
+    #[test]
+    fn triple_des_cbc() {
+        let plaintext: &str = "HelloWorldHelloWorld";
+        let iv: [u8; 8] = [0x01 as u8; 8];
+        let key: [u8; 24] = [
+            0x13, 0x34, 0x57, 0x79, 0x9B, 0xBC, 0xDF, 0xF1, 0x13, 0x34, 0x57, 0x79, 0x9B, 0xBC,
+            0xDF, 0xF1, 0x13, 0x34, 0x57, 0x79, 0x9B, 0xBC, 0xDF, 0xF1,
+        ];
+
+        let mut ciphertext: Vec<u8> = easydes::triple_des_cbc(
+            &key,
+            &iv,
+            &mut plaintext.as_bytes().to_vec(),
+            easydes::Des::Encrypt,
+        );
+
+        println!("{:#02x?}", ciphertext);
+
+        let mut plaintext_again: Vec<u8> =
+            easydes::triple_des_cbc(&key, &iv, &mut ciphertext, easydes::Des::Decrypt);
 
         while plaintext_again.last() == Some(&0x00) {
             plaintext_again.pop();
