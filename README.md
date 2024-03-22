@@ -9,25 +9,25 @@ This is a Rust library that implements the DES cryptographic algorithm.
     easydes 0.1.0
     Encrypt and decrypt with DES.
 
-easydes 0.1.0
-Encrypt and decrypt with DES.
-
-USAGE:
-    easydes [OPTIONS] --key <KEY> --infile <INPATH> <-e|-d>
-
-OPTIONS:
-    -3, --triple_des           Encrypt/Decrypt using Triple DES.
-    -d                         Decrypt
-    -e                         Encrypt
-    -h, --help                 Print help information
-    -i, --iv <IV>              Encryption/Decryption IV. Only used in CBC.
-        --infile <INPATH>      Specify the path to the input file.
-    -k, --key <KEY>            Encryption/Decryption key
-    -m <MODE>                  Specify the mode. Default is ECB which doesn't require an IV.
-                               [default: ECB] [possible values: ECB, CBC]
-        --outfile <OUTPATH>    Specify the path to the output file.
-    -v                         Enable verbose logging
-    -V, --version              Print version information
+    easydes 0.1.0
+    Encrypt and decrypt with DES.
+    
+    USAGE:
+        easydes [OPTIONS] --key <KEY> --infile <INPATH> <-e|-d>
+    
+    OPTIONS:
+        -3, --triple_des           Encrypt/Decrypt using Triple DES.
+        -d                         Decrypt
+        -e                         Encrypt
+        -h, --help                 Print help information
+        -i, --iv <IV>              Encryption/Decryption IV. Only used in CBC.
+            --infile <INPATH>      Specify the path to the input file.
+        -k, --key <KEY>            Encryption/Decryption key
+        -m <MODE>                  Specify the mode. Default is ECB which doesn't require an IV.
+                                   [default: ECB] [possible values: ECB, CBC]
+            --outfile <OUTPATH>    Specify the path to the output file.
+        -v                         Enable verbose logging
+        -V, --version              Print version information
 
 
 ### Example
