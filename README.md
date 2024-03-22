@@ -47,7 +47,7 @@ By including the crate with
     use easydes::easydes::*;
 ```
 And then
-
+```rust
 
     let plaintext: &str = "HelloWorldHelloWorld";
     let key: [u8; 8] = [0x13, 0x34, 0x57, 0x79, 0x9B, 0xBC, 0xDF, 0xF1];
@@ -64,7 +64,7 @@ And then
 
     let mut plaintext_again: Vec<u8> =
         easydes::des_cbc(&key, &iv, &mut ciphertext, easydes::Des::Decrypt);
-
+```
 ### Tests
 Please see [TESTING.md](TESTING.md).
 
