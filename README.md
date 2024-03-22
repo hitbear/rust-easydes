@@ -43,9 +43,9 @@ To build the binary with [cargo](https://doc.rust-lang.org/cargo/), run
 ### Using the library
 
 By including the crate with 
-
+```rust
     use easydes::easydes::*;
-
+```
 And then
 
 
