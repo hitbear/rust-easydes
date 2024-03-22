@@ -1,7 +1,9 @@
 extern crate clap;
 
-use clap::{builder::BoolValueParser, Arg, ArgAction, ArgGroup, ArgMatches, Command};
+use clap::{Arg, ArgAction, ArgGroup, ArgMatches, Command};
 use easydes::easydes::*;
+use std::fs::File;
+use std::io::{Read, Write};
 
 fn main() {
     let arg_matches: ArgMatches = Command::new("easydes")
@@ -32,7 +34,15 @@ fn main() {
             Arg::new("if")
                 .long("infile")
                 .value_name("INPATH")
-                .help("Specify the path to the input file."), //.required(false),
+                .help("Specify the path to the input file.")
+                .required(true),
+        )
+        .arg(
+            Arg::new("of")
+                .long("outfile")
+                .value_name("OUTPATH")
+                .help("Specify the path to the output file.")
+                .default_missing_value("./output")
         )
         .arg(
             Arg::new("mode")
@@ -84,26 +94,12 @@ fn main() {
     let mut key: [u8; 8] = [0 as u8; 8];
     hex::decode_to_slice(key_hex_string, &mut key).expect("Decoding key failed");
 
-    //let input: [u8; 9] = [0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0xaa];
-    let input: [u8; 16] = [
-    0x8f,
-    0xd0,
-    0xab,
-    0x49,
-    0xb2,
-    0x8,
-    0x2,
-    0xd3,
-    0x34,
-    0x41,
-    0xf3,
-    0xd8,
-    0xc9,
-    0xf4,
-    0xcf,
-    0x2e,
-];
+    let mut input: Vec<u8> = Vec::new();
 
+    if let Some(infile) = arg_matches.value_of("if") {
+        let mut f = File::open(infile).unwrap();
+        f.read_to_end(&mut input).unwrap();
+    }
 
     let output = match des_mode {
         Mode::ECB => des_ecb(&key, &mut input.to_vec(), enc_or_dec),
@@ -115,5 +111,7 @@ fn main() {
         }
     };
 
-    println!("{:#02x?}", output);
+    let mut outfile = File::create(arg_matches.value_of("of").unwrap()).expect("Could not open output file.");
+    outfile.write_all(&output).unwrap();
+    //println!("{:#02x?}", output);
 }
