@@ -12,7 +12,6 @@ fn main() {
         .arg(
             Arg::new("v")
                 .short('v')
-                //.multiple_occurrences(true)
                 .help("Enable verbose logging"),
         )
         .arg(
@@ -28,7 +27,7 @@ fn main() {
                 .short('i')
                 .long("iv")
                 .value_name("IV")
-                .help("Encryption/Decryption key"),
+                .help("Encryption/Decryption IV. Only used in CBC."),
         )
         .arg(
             Arg::new("if")
@@ -85,7 +84,6 @@ fn main() {
         None => panic!("It was not specified if encryption or decryption should be used."),
     };
 
-    // ToDo: Only in cbc
     if des_mode == Mode::CBC && !arg_matches.is_present("iv") {
         panic!("We need an IV in CBC mode!");
     }
