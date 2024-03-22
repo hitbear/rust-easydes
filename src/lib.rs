@@ -391,6 +391,8 @@ pub mod easydes {
         output
     }
 
+
+
     pub fn triple_des_ecb(key: &[u8], input: &mut Vec<u8>, direction: Des) -> Vec<u8> {
         let mut key1: Vec<u8> = key.to_vec();
         let key3: Vec<u8> = key1.split_off(16);
@@ -410,6 +412,81 @@ pub mod easydes {
                 output
             }
         }
+    }
+
+
+    pub fn triple_des_cbc(key: &[u8],iv: &[u8], input: &mut Vec<u8>, direction: Des) -> Vec<u8> {
+        let mut key1: Vec<u8> = key.to_vec();
+        let key3: Vec<u8> = key1.split_off(16);
+        let key2: Vec<u8> = key1.split_off(8);
+
+        if input.len() % 8 != 0 {
+            add_padding(input);
+        }
+
+        let num_frames: usize = input.len() / 8;
+
+        let mut key_table1: [[u8; 6]; 16] = [[0; 6]; 16];
+        calculate_key_table(key, &mut key_table1);
+
+        let mut key_table2: [[u8; 6]; 16] = [[0; 6]; 16];
+        calculate_key_table(key, &mut key_table2);
+
+        let mut key_table3: [[u8; 6]; 16] = [[0; 6]; 16];
+        calculate_key_table(key, &mut key_table3);
+
+        let mut output: Vec<u8> = Vec::new();
+        match direction {
+            Des::Encrypt => {
+                for frame_ctr in 0..num_frames {
+                    let frame: &mut [u8] = &mut input[(frame_ctr * 8)..((frame_ctr + 1) * 8)];
+
+                    match frame_ctr {
+                        0 => {
+                            for i in 0..8 {
+                                frame[i] = frame[i] ^ iv[i];
+                            }
+                        }
+                        _ => {
+                            for i in 0..8 {
+                                frame[i] = frame[i] ^ output[((frame_ctr - 1) * 8) + i];
+                            }
+                        }
+                    }
+
+                    let block1: [u8; 8] = encrypt_frame(&frame, &Des::Encrypt, &key_table1);
+                    let block2: [u8; 8] = encrypt_frame(&block1, &Des::Decrypt, &key_table2);
+                    let block3: [u8; 8] = encrypt_frame(&block2, &Des::Encrypt, &key_table3);
+
+                    output.extend_from_slice(&block3);
+                }
+            }
+            Des::Decrypt => {
+                for frame_ctr in 0..num_frames {
+                    let frame: &mut [u8] = &mut input[(frame_ctr * 8)..((frame_ctr + 1) * 8)];
+                    let block1: [u8; 8] = encrypt_frame(&frame, &Des::Decrypt, &key_table1);
+                    let block2: [u8; 8] = encrypt_frame(&block1, &Des::Encrypt, &key_table2);
+                    let mut block3: [u8; 8] = encrypt_frame(&block2, &Des::Decrypt, &key_table3);
+
+                    match frame_ctr {
+                        0 => {
+                            for i in 0..8 {
+                                block3[i] = block3[i] ^ iv[i];
+                            }
+                        }
+                        _ => {
+                            for i in 0..8 {
+                                block3[i] = block3[i] ^ input[((frame_ctr - 1) * 8) + i];
+                            }
+                        }
+                    }
+
+                    output.extend_from_slice(&block3);
+                }
+            }
+        }
+
+        output
     }
 }
 
