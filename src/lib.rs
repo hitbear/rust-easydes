@@ -390,6 +390,27 @@ pub mod easydes {
 
         output
     }
+
+    pub fn triple_des_ecb(key: &[u8], input: &mut Vec<u8>, direction: Des) -> Vec<u8> {
+        let mut key1: Vec<u8> = key.to_vec();
+        let key3: Vec<u8> = key1.split_off(16);
+        let key2: Vec<u8> = key1.split_off(8);
+
+        match direction {
+            Des::Encrypt => {
+                let mut tmp: Vec<u8> = des_ecb(key1.as_slice(), input, Des::Encrypt);
+                let mut tmp2: Vec<u8> = des_ecb(key2.as_slice(), &mut tmp, Des::Decrypt);
+                let output: Vec<u8> = des_ecb(key3.as_slice(), &mut tmp2, Des::Encrypt);
+                output
+            }
+            Des::Decrypt => {
+                let mut tmp: Vec<u8> = des_ecb(key3.as_slice(), input, Des::Decrypt);
+                let mut tmp2: Vec<u8> = des_ecb(key2.as_slice(), &mut tmp, Des::Encrypt);
+                let output: Vec<u8> = des_ecb(key1.as_slice(), &mut tmp2, Des::Decrypt);
+                output
+            }
+        }
+    }
 }
 
 mod test_constants;
@@ -480,6 +501,37 @@ mod tests {
         assert_eq!(
             String::from_utf8(plaintext.as_bytes().to_vec()),
             String::from_utf8(plaintext_again)
+        );
+    }
+
+    #[test]
+    fn triple_des_ecb_strings() {
+        let plaintext: &str = "HelloWorldHelloWorld";
+        let key: [u8; 24] = [
+            0x13, 0x34, 0x57, 0x79, 0x9B, 0xBC, 0xDF, 0xF1, 0x13, 0x34, 0x57, 0x79, 0x9B, 0xBC,
+            0xDF, 0xF1, 0x13, 0x34, 0x57, 0x79, 0x9B, 0xBC, 0xDF, 0xF1,
+        ];
+
+        let mut ciphertext: Vec<u8> = easydes::triple_des_ecb(
+            &key,
+            &mut plaintext.as_bytes().to_vec(),
+            easydes::Des::Encrypt,
+        );
+
+        println!("{:#02x?}", ciphertext);
+
+        let mut plaintext_again: Vec<u8> =
+            easydes::triple_des_ecb(&key, &mut ciphertext, easydes::Des::Decrypt);
+
+        while plaintext_again.last() == Some(&0x00) {
+            plaintext_again.pop();
+        }
+
+        println!("{:?}", String::from_utf8(plaintext_again.clone()).unwrap());
+
+        assert_eq!(
+            String::from_utf8(plaintext.as_bytes().to_vec()).unwrap(),
+            String::from_utf8(plaintext_again).unwrap()
         );
     }
 }

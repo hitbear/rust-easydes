@@ -1,6 +1,6 @@
 # Easydes
 
-## Encrypt with DES easyly in Rust.
+## Encrypt with DES easily in Rust.
 
 This is a Rust library that implements the DES cryptographic algorithm. 
 ##Running 
@@ -46,7 +46,7 @@ By including the crate with
 ```rust
     use easydes::easydes::*;
 ```
-And then
+you can use the DES functions in your own library. For example 
 ```rust
 
     let plaintext: &str = "HelloWorldHelloWorld";

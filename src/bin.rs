@@ -9,11 +9,7 @@ fn main() {
     let arg_matches: ArgMatches = Command::new("easydes")
         .version(VERSION)
         .about("Encrypt and decrypt with DES.")
-        .arg(
-            Arg::new("v")
-                .short('v')
-                .help("Enable verbose logging"),
-        )
+        .arg(Arg::new("v").short('v').help("Enable verbose logging"))
         .arg(
             Arg::new("key")
                 .short('k')
@@ -41,7 +37,7 @@ fn main() {
                 .long("outfile")
                 .value_name("OUTPATH")
                 .help("Specify the path to the output file.")
-                .default_missing_value("./output")
+                .default_missing_value("./output"),
         )
         .arg(
             Arg::new("mode")
@@ -109,7 +105,8 @@ fn main() {
         }
     };
 
-    let mut outfile = File::create(arg_matches.value_of("of").unwrap()).expect("Could not open output file.");
+    let mut outfile =
+        File::create(arg_matches.value_of("of").unwrap()).expect("Could not open output file.");
     outfile.write_all(&output).unwrap();
     //println!("{:#02x?}", output);
 }
